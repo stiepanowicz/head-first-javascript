@@ -1,39 +1,29 @@
-const view = {
-    displayMessage: function(msg) {
-        const messageArea = document.getElementById("messageArea");
-        messageArea.innerHTML = msg;
-    },
-    displayHit: function(location) {
-        const cell = document.getElementById(location);
-        cell.setAttribute("class", "hit"); 
-    },
-    displayMiss: function(location) {
-        const cell = document.getElementById(location);
-        cell.setAttribute("class", "miss");
-    }
-}
-
 const model = {
     boardSize: 7,
     numShips: 3,
     shipLength: 3,
     shipsSunk: 0,
 
-    ships: [{ locations: ["06", "16", "26"], hits: ["", "", ""] },
-            { locations: ["24", "34", "44"], hits: ["", "", ""] },
-            { locations: ["10", "11", "12"], hits: ["", "", ""] }],
-    
+    ships: [{ locations: [0, 0, 0], hits: ["", "", ""] },
+            { locations: [0, 0, 0], hits: ["", "", ""] },
+            { locations: [0, 0, 0], hits: ["", "", ""] }
+    ],
+
     fire: function(guess) {
         for (let i = 0; i < this.numShips; i++) {
             let ship = this.ships[i];
             let index = ship.locations.indexOf(guess);
-            if (index >= 0) {
+            if (ship.hits[index] === "hit") {
+                view.displayMessage("You already hit that location!");
+                return true;
+            } else if (index >= 0) {
                 ship.hits[index] = "hit";
                 view.displayHit(guess);
                 view.displayMessage("HIT!");
+
                 if (this.isSunk(ship)) {
                     view.displayMessage("You sank my battleship!");
-                    this.shipSunk++;
+                    this.shipsSunk++;
                 }
                 return true;
             }
@@ -50,8 +40,68 @@ const model = {
             }
         }
         return true;
+    },
+
+    generateShipLocations: function() {
+        let locations;
+        for (let i = 0; i < this.numShips; i++) {
+            do {
+                locations = this.generateShip();
+            } while (this.collision(locations));
+            this.ships[i].locations = locations;
+        }
+    },
+
+    generateShip: function() {
+        let direction = Math.floor(Math.random() * 2);
+        let row;
+        let col;
+        if (direction === 1) {
+            row = Math.floor(Math.random() * this.boardSize);
+            col = Math.floor(Math.random() * (this.boardSize - (this.shipLength + 1)));
+        } else {
+            row = Math.floor(Math.random() * (this.boardSize - (this.shipLength + 1)));
+            col = Math.floor(Math.random() * this.boardSize);
+        }
+
+        let newShipLocations = [];
+        for (let i = 0; i < this.shipLength; i++) {
+            if (direction === 1) {
+                newShipLocations.push(row + "" + (col + i));
+            } else {
+                newShipLocations.push((row + i) + "" + col);
+            }
+        }
+        return newShipLocations;
+    },
+
+    collision: function(locations) {
+        for (let i = 0; i < this.numShips; i++) {
+            let ship = this.ships[i];
+            for (let j = 0; j < locations.length; j++) {
+                if (ship.locations.indexOf(locations[j]) >= 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-}
+};
+
+const view = {
+    displayMessage: function(msg) {
+        let messageArea = document.getElementById("messageArea");
+        messageArea.innerHTML = msg;
+    },
+    displayHit: function(location) {
+        let cell = document.getElementById(location);
+        cell.setAttribute("class", "hit"); 
+    },
+    displayMiss: function(location) {
+        let cell = document.getElementById(location);
+        cell.setAttribute("class", "miss");
+    }
+};
 
 const controller = {
     guesses: 0,
@@ -68,11 +118,12 @@ const controller = {
     }
 }
 
+// function to parse a guess
 function parseGuess(guess) {
     const alphabet = ["A", "B", "C", "D", "E", "F", "G"];
 
     if (guess == null || guess.length !== 2) {
-        alert("Enter letter and number on the board. (e.g. C3");
+        alert("Enter letter and number on the board. (e.g. C3)");
     } else {
         let firstChar = guess.charAt(0);
         let row  = alphabet.indexOf(firstChar);
@@ -89,16 +140,29 @@ function parseGuess(guess) {
     return null;
 }
 
-controller.processGuess("A0");
+// event handlers
+function handleFireButton() {
+    let guessInput = document.getElementById("guessInput");
+    let guess = guessInput.value;
+    controller.processGuess(guess);
+    guessInput.value = "";
+}
 
-controller.processGuess("A6");
-controller.processGuess("B6");
-controller.processGuess("C6");
+function handleKeyPress(e) {
+    let fireButton = document.getElementById("fireButton");
+    if (e.keyCode === 13) {
+        fireButton.click();
+        return false;
+    }
+}
+// init - called when the page has completed loading 
+window.onload = init();
 
-controller.processGuess("C4");
-controller.processGuess("D4");
-controller.processGuess("E4");
+function init() {
+    let fireButton = document.getElementById("fireButton");
+    fireButton.onclick = handleFireButton;
+    let guessInput = document.getElementById("guessInput");
+    guessInput.onkeydown = handleKeyPress;
 
-controller.processGuess("B0");
-controller.processGuess("B1");
-controller.processGuess("B2");
+    model.generateShipLocations();
+}
