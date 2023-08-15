@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image hover</title>
+    <style> 
+        body { margin: 20px }
+        img { margin: 20px }
+    </style>
+    <script>
+        window.onload = init;
+
+        function init() {
+            let images = document.getElementsByTagName("img");
+            for (let i = 0; i < images.length; i++) {
+                images[i].onmouseover = showImage;
+                images[i].onmouseout = reblur;
+            }
+        }
+
+        function showImage(eventObj) {
+            let image = eventObj.target;
+            
+            let name = image.id;
+            name = `img/${name}.jpg`;
+            image.src = name;
+            image.alt = "image";
+
+        }
+
+        function reblur(eventObj) {
+            let image = eventObj.target
+            let name = image.id;
+            name = `img/${name}blur.jpg`;
+            image.src = name;
+            image.alt = "blurred image";
+        }
+    </script>
+</head>
+<body>
+    <img id="zero" src="img/zeroblur.jpg" alt="blurred image">
+    <img id="one" src="img/oneblur.jpg" alt="blurred image">
+    <img id="two" src="img/twoblur.jpg" alt="blurred image">
+    <img id="three" src="img/threeblur.jpg" alt="blurred image">
+    <img id="four" src="img/fourblur.jpg" alt="blurred image">
+    <img id="five" src="img/fiveblur.jpg" alt="blurred image">
+</body>
+</html>

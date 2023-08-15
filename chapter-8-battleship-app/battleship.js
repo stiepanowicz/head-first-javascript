@@ -146,6 +146,9 @@ function handleFireButton() {
     let guess = guessInput.value;
     controller.processGuess(guess);
     guessInput.value = "";
+    let guessInputClick = guessInputClick.value;
+    controller.processGuess(guess);
+    guessInput.value = "";
 }
 
 function handleKeyPress(e) {
@@ -154,15 +157,34 @@ function handleKeyPress(e) {
         fireButton.click();
         return false;
     }
+    if (e.keyCode === 13) {
+        e.preventDefault(); // Prevent default form submission
+        handleFireButton();
+    }
 }
 // init - called when the page has completed loading 
-window.onload = init();
+window.onload = init;
 
 function init() {
     let fireButton = document.getElementById("fireButton");
     fireButton.onclick = handleFireButton;
     let guessInput = document.getElementById("guessInput");
     guessInput.onkeydown = handleKeyPress;
+
+    let cells = document.querySelectorAll("td");
+    cells.forEach(cell => {
+        cell.addEventListener("click", () => {
+            handleCellClick(cell.id);
+        });
+    });
+
+    // Add event listener to the form submit button
+    let fireButtonClick = document.getElementById("fireButton");
+    fireButtonClick.addEventListener("click", handleFireButton);
+
+    // Add event listener for Enter key press in the input field
+    let guessInputClick = document.getElementById("guessInput");
+    guessInputClick.addEventListener("keydown", handleKeyPress);
 
     model.generateShipLocations();
 }

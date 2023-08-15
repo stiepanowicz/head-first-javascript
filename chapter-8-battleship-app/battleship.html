@@ -27,10 +27,14 @@
             left: 173px;
             top: 98px;
             border-spacing: 0px;
+            border-collapse: collapse;
         }
         td {
             width: 94px;
             height: 94px;
+            text-align: center;
+            vertical-align: middle;
+            transition: background-color 0.3s ease-in-out;
         }
         form  {
             position: absolute;
@@ -49,6 +53,9 @@
         }
         .miss {
             background: url("miss.png") no-repeat center center;
+        }
+        td:hover {
+        background-color: lightgray;
         }
     </style>
 </head>
